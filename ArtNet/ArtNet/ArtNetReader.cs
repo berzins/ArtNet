@@ -25,8 +25,16 @@ namespace ArtNet {
         }
 
         private void init(ArtDispatcher dispatcher) {
-            udpListener = new UdpClient(Const.BIND_PORT);
-            ipEndpoint = new IPEndPoint(IPAddress.Any, Const.BIND_PORT);
+
+
+            //udpListener = new UdpClient(Const.BIND_PORT);
+            //ipEndpoint = new IPEndPoint(IPAddress.Any, Const.BIND_PORT);
+            ipEndpoint = new IPEndPoint(IPAddress.Parse("192.168.0.100"), Const.BIND_PORT);
+            udpListener = new UdpClient();
+            udpListener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            udpListener.Client.Bind(ipEndpoint);
+
+            
             artDispatcher = dispatcher;
         }
         /// <summary>
@@ -47,6 +55,7 @@ namespace ArtNet {
         private void readPacket() {
             while (true) {
                 var packet = udpListener.Receive(ref ipEndpoint);
+
                 var s = Const.GetASCIIFromByteArray(
                     packet, 0, Const.ARTNET_STR.Length
                     );

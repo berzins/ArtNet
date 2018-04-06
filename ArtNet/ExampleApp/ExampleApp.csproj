@@ -51,7 +51,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary2\ArtNet.csproj">
+    <ProjectReference Include="..\ArtNet\ArtNet.csproj">
       <Project>{188c5ef2-1406-4ed3-80f8-32f9921721ba}</Project>
       <Name>ArtNet</Name>
     </ProjectReference>

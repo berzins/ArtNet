@@ -25,9 +25,10 @@ namespace ArtNet {
         internal void Dispatch(byte[] packet) {
            // packetQueue.Enqueue(packet);
             int opCode = this.getOpCode(packet);
-            Console.WriteLine("opCode = " + opCode);
+            //Console.WriteLine("opCode = " + opCode);
 
             if (opCode == Const.OPCODE_OpDmx) {
+                Utils.ArtPacketStopwatch = System.Diagnostics.Stopwatch.StartNew();
                 notifyListeners(artDmxListeners, new ArtDmxPacket(packet));
             }
             else if (opCode == Const.OPCODE_OpPoll) {
