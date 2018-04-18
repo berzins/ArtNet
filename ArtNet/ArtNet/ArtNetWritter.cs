@@ -12,14 +12,16 @@ namespace ArtNet {
     public class ArtNetWritter {
 
         private Socket socket;
-        private IPAddress broadcstIp;
+        private IPAddress ipAddress;
         private IPEndPoint ipEndpoint;
         private Packet packet;
 
-        public ArtNetWritter() {
+        public ArtNetWritter() : this(IPAddress.Parse("255.255.255.255")) {}
+
+        public ArtNetWritter(IPAddress ip) {
             socket = null;
-            broadcstIp = IPAddress.Parse("192.168.0.255");
-            ipEndpoint = new IPEndPoint(broadcstIp, Const.BIND_PORT);
+            ipAddress = ip;
+            ipEndpoint = new IPEndPoint(ipAddress, Const.BIND_PORT);
             packet = new ArtDmxPacket();
         }
 
@@ -40,6 +42,8 @@ namespace ArtNet {
             }
             socket.Close();
         }
+
+
 
         public void SetPacket(Packet p) {
             if (p != null) {

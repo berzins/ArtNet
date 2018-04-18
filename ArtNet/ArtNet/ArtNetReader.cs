@@ -42,11 +42,19 @@ namespace ArtNet {
         }
 
         private void initUdp() {
-            udpListener = new UdpClient();
-            udpListener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            udpListener.Client.Bind(ipEndpoint);
-            Logger.Log("Art Net Reader binded to " + ipEndpoint.Address + ":" + ipEndpoint.Port, LogLevel.INFO);
+            try
+            {
+                udpListener = new UdpClient();
+                udpListener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                udpListener.Client.Bind(ipEndpoint);
+                Logger.Log("Art Net Reader binded to " + ipEndpoint.Address + ":" + ipEndpoint.Port, LogLevel.INFO);
+            }
+            catch (Exception e) {
+                Logger.Log("ArtNet reader failed to bin ip " + ipEndpoint.Address + " : "
+                    + e.Message + " : " + e.StackTrace, LogLevel.ERROR);
+            }
         }
+
         /// <summary>
         /// Starts packet recieving and dispatching in a new thread
         /// </summary>
@@ -56,13 +64,33 @@ namespace ArtNet {
             readPacketThread.Start();
             Logger.Log("Art Net Reader started", LogLevel.INFO);
         }
+
         /// <summary>
-        /// Stops packet recieving loop to exit
+        /// Exits art packet reading loop
         /// </summary>
         public void Stop() {
-            //readPacketThread.Abort();
-            //readPacketThread.Join();
-            running = false;
+
+            // set listening loop to false
+            running = false; 
+
+            //give it a last punch in case noone is sending enything
+            var soc = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            var endp = new IPEndPoint(IPAddress.Parse("127.0.0.1"), Const.BIND_PORT);
+            soc.SendTo(Encoding.ASCII.GetBytes("go home"), endp);
+        }
+
+        /// <summary>
+        /// Sets udp listener ip address
+        /// Incase upd Listener is listening. It stops, sets and starts again it
+        /// </summary>
+        public void SetBindIp(IPAddress bindIp) {
+            // in case that happens while running
+            if (udpListener != null) {
+                Stop();
+                ipEndpoint = new IPEndPoint(bindIp, Const.BIND_PORT);
+                Start();
+            }
+            ipEndpoint = new IPEndPoint(bindIp, Const.BIND_PORT);
         }
 
         private void readPacket() {
@@ -84,7 +112,7 @@ namespace ArtNet {
             }
             udpListener.Close();
             udpListener = null;
-            Logger.Log("Art Net Reader stopped", LogLevel.INFO);
+            Logger.Log("ArtNet reader stopped", LogLevel.INFO);
         }
 
         public List<IPAddress> GetAvailableBindAddresses() {
@@ -94,7 +122,6 @@ namespace ArtNet {
 
                 foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses) {
                     if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
-                        Console.WriteLine(ni.Name + " , " + ip.Address.ToString());
                     }
                 }
             }
