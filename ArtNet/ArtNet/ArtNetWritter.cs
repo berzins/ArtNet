@@ -35,8 +35,8 @@ namespace ArtNet {
                 );
             try {
                 socket.SendTo(p.Data, ipEndpoint);
-            } catch (Exception) {
-                Console.WriteLine("oh no!");
+            } catch (Exception e) {
+                Console.WriteLine("oh no!" + e.Message + " ..... " + e.StackTrace);
             }
             socket.Close();
         }
